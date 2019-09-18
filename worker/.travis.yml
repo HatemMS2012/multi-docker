@@ -1,0 +1,28 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker build -t hmsdt/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run hmsdt/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t hmsdt/multi-client ./client
+  - docker build -t hmsdt/multi-nginx ./nginx
+  - docker build -t hmsdt/multi-server ./server
+  - docker build -t hmsdt/multi-worker ./worker
+
+  # Log in to the docker CI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push hmsdt/multi-client
+  - docker push hmsdt/multi-nginx
+  - docker push hmsdt/multi-server
+  - docker push hmsdt/multi-worker
+
+
+
+
+# Take those images and push them into docker-hub

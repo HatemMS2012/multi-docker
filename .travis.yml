@@ -16,6 +16,8 @@ after_success:
   - docker build -t hmsdt/multi-worker ./worker
 
   # Log in to the docker CI
+  # Take those images and push them into docker-hub
+
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   - docker push hmsdt/multi-client
   - docker push hmsdt/multi-nginx
@@ -23,6 +25,15 @@ after_success:
   - docker push hmsdt/multi-worker
 
 
+deploy:
+    provider: elasticbeanstalk
+    region: "us-east-2"
+    app: "multi-docker"
+    env: "MultiDocker-env"
+    bucket_name: "elasticbeanstalk-us-east-2-255510537618"
+    bucket_path: "docker-multi"
+    on:
+      branch: master
 
-
-# Take those images and push them into docker-hub
+    access_key_id: "$AWS_ACCESS_KEY"
+    secret_access_key: "$AWS_SECRET_KEY"
